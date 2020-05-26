@@ -7,7 +7,8 @@ from argparse import ArgumentParser
 
 from ._version import __version__
 from .irrev_mech import convert_mech_irrev
-from .remove_plog import remove_plog_reactions
+# from .remove_plog import remove_plog_reactions
+from .un_plog import convert_mech_un_plog
 
 
 def mech_util(argv):
@@ -27,7 +28,7 @@ def mech_util(argv):
         type=str,
         default=None
         )
-    
+
     parser.add_argument(
         '--remove_irrev',
         help='Flags conversion of all reversible reactions to irreversible only',
@@ -67,7 +68,7 @@ def mech_util(argv):
         default=1,
         type=int
         )
-    
+
     parser.add_argument(
         '--output',
         help='output file for new model',
@@ -79,6 +80,12 @@ def mech_util(argv):
         '-V', '--version',
         action='store_true',
         help='Show the version of mech_util and quit'
+        )
+
+    parser.add_argument(
+        '-P', '--permissive',
+        help='Allow larger uncertainties in un_plog',
+        dest='permissive', action='store_true', default=False
         )
 
     if len(argv) == 0:
@@ -93,17 +100,17 @@ def mech_util(argv):
             path=os.path.abspath(os.path.dirname(__file__))
             ))
         sys.exit(0)
-    
+
     if not args.remove_irrev and not args.remove_plog:
         parser.error('Need to specify either remove_irrev or remove_plog')
 
     if args.remove_irrev:
         convert_mech_irrev(
-            args.model, args.thermo, args.temp_range, 
+            args.model, args.thermo, args.temp_range,
             args.output, args.num_threads
             )
-    
+
     if args.remove_plog:
-        remove_plog_reactions(
-            args.model, args.thermo, args.pressure, args.output
-            )
+        convert_mech_un_plog(
+            args.model, args.thermo, args.pressure, args.temp_range,
+            args.permissive)
