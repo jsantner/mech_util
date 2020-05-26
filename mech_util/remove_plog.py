@@ -37,7 +37,7 @@ def convert_plog(rxn, pressure):
             pars_closest = pars
 
     rxn = ReacInfo(
-        rxn.rev, rxn.reac, rxn.reac_nu, rxn.prod, rxn.prod_nu, 
+        rxn.rev, rxn.reac, rxn.reac_nu, rxn.prod, rxn.prod_nu,
         pars_closest[1], pars_closest[2], pars_closest[3]
         )
 
@@ -60,7 +60,7 @@ def remove_plog_reactions(
     therm_name : str, optional
         Thermodynamic database filename (e.g. 'therm.dat') or None
     pressure : str, optional
-        Pressure with units for hard-coding PLOG reactions. 
+        Pressure with units for hard-coding PLOG reactions.
         If no units specified, atm assumed.
     output_file : str, optional
         Filename for new kinetic model
