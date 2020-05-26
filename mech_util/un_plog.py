@@ -29,7 +29,7 @@ except ImportError:
     raise
 
 # Local imports
-from . import chem_utilities as chem
+from . import chem_utilities as chem, units, Q_
 from . import mech_interpret as mech
 
 
@@ -285,7 +285,7 @@ def single_arrhenius(invT, logA, b, E):
 
 def refit_reaction(reaction, pressure, temp_range, permissive=False):
     """ Create a single Arrhenius function for the PLOG reaction at the given
-    pressure [atm] and temperature range [K].
+    pressure and temperature range [K].
 
     """
     logk, T, p0 = interpolate_k(reaction, pressure, temp_range, permissive)
@@ -357,7 +357,7 @@ def refit_reaction(reaction, pressure, temp_range, permissive=False):
 
 def interpolate_k(reaction, pressure, temp_range, permissive):
     """ Calculate the reaction rate as a function of temperature at the given
-    pressure [atm] and temperature range [K].
+    pressure and temperature range [K].
 
     Returns
     ------
@@ -507,19 +507,44 @@ def plot_fit(r_orig, r1_mod, r2_mod, mech_name, pressure, temp_range,
 
 def convert_mech_un_plog(mech_name, therm_name=None, pressure=1.0,
                          temp_range=[300.,5000.], permissive=False, plot=True):
-    """Convert Chemkin-style mechanism with PLOG reactions.
+    """
 
-    Input
-    mech_name: string with reaction mechanism filename (e.g. 'mech.dat')
-    pressure: float with pressure in atm.
+
+    Parameters
+    ----------
+    mech_name : string
+        Reaction mechanism filename (e.g. 'mech.dat')
+    therm_name : string, optional
+        Thermodynamic database filename (e.g. 'therm.dat') or None
+    pressure : TYPE, optional
+        Pressure with units for hard-coding PLOG reactions.
+        If no units specified, atm assumed.
+    temp_range : list, optional
+        Temperature range for PLOG fitting. The default is [300.,5000.].
+    permissive : bool, optional
+        Allow larger uncertainties with warnings. The default is False.
+    plot : TYPE, optional
+        Plot all new reaction fits. The default is True.
+
+    Returns
+    -------
+    None.
 
     """
+    pressure = Q_(pressure)
+    try:
+        pressure.ito('pascal')
+    except DimensionalityError:
+        warnings.warn(
+            'No units specified, or units incompatible with pressure. ',
+            'Assuming atm.'
+            )
+        pressure = (pressure.magnitude * units.atm).to('pascal')
+
 
     # interpret reaction mechanism file
     [elems, specs, reacs] = mech.read_mech(mech_name, therm_name)
     # I don't think the thermo file will be necessary
-
-    pressure *= 101325.0  # Convert to Pa to use internally.
 
     # Delete old figures
     dirname = os.path.dirname(mech_name)
