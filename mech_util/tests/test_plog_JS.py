@@ -2,15 +2,16 @@
 import os
 import random
 import numpy as np
-from un_plog.un_plog import convert_mech_un_plog
+from ..un_plog import convert_mech_un_plog
 
 
-def test_convert_mech_irrev():
+def test_convert_mech():
     pth = os.path.dirname(os.path.realpath(__file__))
     P = 10 ** (-2 + 4*random.random())  # Pressure for the test.
-    print('Testing at {:.1f} atm'.format(P))
-    args = {'mech_name': os.path.join(pth, 'butane_100spec.inp'),
-            'therm_name': os.path.join(pth, 'butane_100spec_therm.dat'),
+    P = '{:.2g} atm'.format(P)
+    print('Testing at {:}'.format(P))
+    args = {'mech_name': os.path.join(pth, 'mechanisms', 'butane_100spec.inp'),
+            'therm_name': os.path.join(pth, 'mechanisms', 'butane_100spec_therm.dat'),
             'pressure': P, 'temp_range': [300.0, 5000.0]}
     convert_mech_un_plog(**args, permissive=True, plot=False)
     compare_rate(5, **args)
@@ -31,11 +32,14 @@ def compare_rate(rxn_num, mech_name, therm_name, pressure, temp_range):
     import cantera
     import cantera.ck2cti
 
+    pth = os.path.dirname(os.path.realpath(__file__))
     parser = cantera.ck2cti.Parser()
-    parser.convertMech(mech_name, therm_name, outName='original.cti')
+    parser.convertMech(mech_name, therm_name,
+                       outName=os.path.join(pth, 'mechanisms', 'original.cti'))
     head, tail = os.path.split(mech_name)
     new_mech = os.path.join(head, 'un_plog_' + tail)
-    parser.convertMech(new_mech, therm_name, outName='un_plog.cti')
+    parser.convertMech(new_mech, therm_name,
+                       outName=os.path.join(pth, 'mechanisms', 'un_plog.cti'))
 
     gas1 = cantera.Solution('original.cti')
     gas2 = cantera.Solution('un_plog.cti')

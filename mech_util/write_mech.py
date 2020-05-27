@@ -6,13 +6,14 @@ from .chem_utilities import units, GAS_CONSTANT, get_elem_wt
 from .mech_interpret import elem_wt
 
 
-def write_mech(filename, elems, specs, reacs):
+def write_mech(filename, elems, specs, reacs, header=''):
     """Write Chemkin-format mechanism.
 
     Input
     """
     with open(filename, 'w') as file:
 
+        file.write(header)
         # elements
         file.write('ELEMENTS\n')
 
@@ -36,7 +37,7 @@ def write_mech(filename, elems, specs, reacs):
             break_on_hyphens=False
             )
         file.write(
-            'SPECIES\n' + 
+            'SPECIES\n' +
             f'{species_names}\n'
             'END\n\n'
             )
@@ -108,7 +109,7 @@ def write_mech(filename, elems, specs, reacs):
 
             # now add Arrhenius coefficients to the same line
             line += ' {:.4e} {:.4e} {:.4e}'.format(
-                rxn.A, rxn.b, 
+                rxn.A, rxn.b,
                 (rxn.E * GAS_CONSTANT).to(units('cal/mole')).magnitude
                 )
 
@@ -141,13 +142,13 @@ def write_mech(filename, elems, specs, reacs):
                 if len(rxn.low) > 0:
                     rxn.low[0] *= 1000. ** sum(rxn.reac_nu)
                     line = '  low /{:.4e}  {:.4e}  {:.4e} /\n'.format(
-                        rxn.low[0], rxn.low[1], 
+                        rxn.low[0], rxn.low[1],
                         (rxn.low[2] * GAS_CONSTANT).to(units('cal/mole')).magnitude
                         )
                 else:
                     rxn.high[0] *= 1000. ** (sum(rxn.reac_nu) - 2.)
                     line = '  high /{:.4e}  {:.4e}  {:.4e} /\n'.format(
-                        rxn.high[0], rxn.high[1], 
+                        rxn.high[0], rxn.high[1],
                         (rxn.high[2] * GAS_CONSTANT).to(units('cal/mole')).magnitude
                         )
                 file.write(line)

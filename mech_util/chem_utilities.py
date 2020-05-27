@@ -203,7 +203,7 @@ class ReacInfo(CommonEqualityMixin):
         self.cheb_n_pres = 0
         # Pressure limits for Chebyshev fit [Pa]
         self.cheb_plim = [
-            Q_(0.001, 'atm').to('pascal'), 
+            Q_(0.001, 'atm').to('pascal'),
             Q_(100.0, 'atm').to('pascal')
             ]
         # Temperature limits for Chebyshev fit [K]
@@ -217,6 +217,10 @@ class ReacInfo(CommonEqualityMixin):
         self.plog = False
         # List of arrays with [pressure [Pa], A, b, E]
         self.plog_par = None
+
+    def __str__(self):
+        # Not 100% accurate...
+        return '+'.join(self.reac) + '=' + '+'.join(self.prod)
 
 
 class SpecInfo(CommonEqualityMixin):
