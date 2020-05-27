@@ -33,16 +33,18 @@ def compare_rate(rxn_num, mech_name, therm_name, pressure, temp_range):
     import cantera.ck2cti
 
     pth = os.path.dirname(os.path.realpath(__file__))
+    wdir = os.path.join(pth, 'mechanisms')
+
     parser = cantera.ck2cti.Parser()
     parser.convertMech(mech_name, therm_name,
-                       outName=os.path.join(pth, 'mechanisms', 'original.cti'))
+                       outName=os.path.join(wdir, 'original.cti'))
     head, tail = os.path.split(mech_name)
     new_mech = os.path.join(head, 'un_plog_' + tail)
     parser.convertMech(new_mech, therm_name,
-                       outName=os.path.join(pth, 'mechanisms', 'un_plog.cti'))
+                       outName=os.path.join(wdir, 'un_plog.cti'))
 
-    gas1 = cantera.Solution('original.cti')
-    gas2 = cantera.Solution('un_plog.cti')
+    gas1 = cantera.Solution(os.path.join(wdir, 'original.cti'))
+    gas2 = cantera.Solution(os.path.join(wdir, 'un_plog.cti'))
 
     success_counter = 0
     for i in range(10):  # Test with 10 random parameters

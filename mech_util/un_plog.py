@@ -149,11 +149,27 @@ def refit_reaction(reaction, pressure, temp_range, permissive=False):
 
 
 def interpolate_k(reaction, pressure, temp_range, permissive):
-    """ Calculate the reaction rate as a function of temperature at the given
-    pressure and temperature range [K].
+    """
+    Calculate reaction rate as a function of T for PLOG reactions.
+
+    Parameters
+    ----------
+    reaction : ReacInfo
+        Reaction object
+    pressure : pint quantity
+        Pressure to evaluate reaction rate.
+    temp_range : list
+        Temperature range [K] over which to evaluate the reaction rate.
+    permissive : bool, int
+        If pressure is outside the PLOG range:
+            0, False: raise error
+            1, True: print warning
+            2: ignore
 
     Returns
-    ------
+    -------
+    logk : array
+        Natural log of the reaction rate as a function of temperature.
     k : array
         Natural log of the reaction rate as a function of temperature
     T : array
@@ -161,6 +177,7 @@ def interpolate_k(reaction, pressure, temp_range, permissive):
     p0 : list
         Initial guess for the fit. 3 parameters for a single Arrhenius, 6
         parameters for a double Arrhenius.
+
     """
     interp_flag = False
 
@@ -170,11 +187,13 @@ def interpolate_k(reaction, pressure, temp_range, permissive):
     # If outside the range, use the max or min plog parameters
     if pressures[-1] < pressure or pressures[0] > pressure:
         msg = ('Reaction {:}. The given pressure of '
-              '{:.2g} atm is outside the given PLOG pressures, '
-              '{:.2g} - {:.2g}.'.format(str(reaction), pressure/101325,
-                                       pressures[0]/101325,
-                                       pressures[-1]/101325))
-        if permissive:
+               '{:.2g} atm is outside the given PLOG pressures, '
+               '{:.2g} - {:.2g} atm.'.format(
+                  str(reaction), pressure.to('atm').m,
+                  pressures[0].to('atm').m, pressures[-1].to('atm').m))
+        if permissive == 2:
+            pass
+        elif permissive:
             print('WARNING: ' + msg)
         else:
             raise ValueError(msg)
@@ -252,7 +271,7 @@ def plot_fit(r_orig, r1_mod, r2_mod, mech_name, pressure, temp_range,
         not permissive: raise error.
     """
     T = 1/np.linspace(1/temp_range[0], 1/temp_range[1], 200)
-    logk_0, T0, _ = interpolate_k(r_orig, pressure, temp_range, permissive)
+    logk_0, T0, _ = interpolate_k(r_orig, pressure, temp_range, 2)
     assert np.allclose(T, T0)
     k_0 = np.exp(logk_0)
 

@@ -183,6 +183,7 @@ def read_mech(mech_filename, therm_filename):
 
                 # get Arrhenius coefficients
                 line_split = line.split()
+                eqn = ' '.join(line_split[:-3])
                 n = len(line_split)
                 reac_A = float(line_split[n - 3])
                 reac_b = float(line_split[n - 2])
@@ -436,8 +437,8 @@ def read_mech(mech_filename, therm_filename):
                         reac_A /= 1000. ** (reac_ord - 1.)
 
                 # add reaction to list
-                reac = ReacInfo(reac_rev, reac_spec, reac_nu,
-                                prod_spec, prod_nu, reac_A, reac_b, reac_E
+                reac = ReacInfo(reac_rev, reac_spec, reac_nu, prod_spec,
+                                prod_nu, reac_A, reac_b, reac_E, eqn
                                 )
                 reac.thd_body = thd
                 reac.pdep = pdep
@@ -995,7 +996,7 @@ def read_mech_ct(filename=None, gas=None):
             reac.plog_par = []
             for rate in rxn.rates:
                 activation_energy = rate[1].activation_energy * units_activation_energy
-                pars = [rate[0] * units.pascal, 
+                pars = [rate[0] * units.pascal,
                         rate[1].pre_exponential_factor,
                         rate[1].temperature_exponent,
                         (activation_energy / GAS_CONSTANT).to(units.kelvin)

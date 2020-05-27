@@ -127,6 +127,8 @@ class ReacInfo(CommonEqualityMixin):
         List of reverse Arrhenius coefficients (default empty).
     dup : bool, optional
         Duplicate reaction flag (default False).
+    eqn : str, optional
+        Reaction equation
     thd : bool, optional
         Third-body reaction flag (default False).
     thd_body : list of list of [str, float], optional
@@ -157,11 +159,13 @@ class ReacInfo(CommonEqualityMixin):
     If `troe` and `sri` are both False, then the Lindemann is assumed.
     """
 
-    def __init__(self, rev, reactants, reac_nu, products, prod_nu, A, b, E):
+    def __init__(self, rev, reactants, reac_nu, products, prod_nu, A, b, E,
+                 eqn=''):
         self.reac = reactants
         self.reac_nu = reac_nu
         self.prod = products
         self.prod_nu = prod_nu
+        self.eqn = eqn
 
         # Arrhenius coefficients
         # pre-exponential factor [m, kmol, s]
@@ -220,7 +224,7 @@ class ReacInfo(CommonEqualityMixin):
 
     def __str__(self):
         # Not 100% accurate...
-        return '+'.join(self.reac) + '=' + '+'.join(self.prod)
+        return self.eqn
 
 
 class SpecInfo(CommonEqualityMixin):
