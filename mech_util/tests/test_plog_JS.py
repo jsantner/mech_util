@@ -3,6 +3,7 @@ import os
 import random
 import numpy as np
 from ..un_plog import convert_mech_un_plog
+from ..mech_interpret import read_mech
 
 
 def test_convert_mech():
@@ -14,15 +15,27 @@ def test_convert_mech():
             'therm_name': os.path.join(pth, 'mechanisms', 'butane_100spec_therm.dat'),
             'pressure': P, 'temp_range': [300.0, 5000.0]}
     convert_mech_un_plog(**args, permissive=True, plot=False)
-    compare_rate(5, **args)
+
+    head, tail = os.path.split(args['mech_name'])
+    new_mech = os.path.join(head, 'un_plog_' + tail)
+    all_removed(new_mech, args['therm_name'])
+
+    compare_rate(**args)
     # blessed = open(os.path.join(pth, 'mech_blessed.txt'), 'r').read()
     # output = open(os.path.join(pth, 'mech_output.txt'), 'r').read()
     # assert output == blessed
     # if os.path.exists(os.path.join(pth, 'mech_output.txt')):
     #     os.remove(os.path.join(pth, 'mech_output.txt'))
 
-def compare_rate(rxn_num, mech_name, therm_name, pressure, temp_range):
-    """ Compare rate # rxn_num in the mechanism to its modified version.
+
+def all_removed(mech, therm):
+    " Check that all PLOG rates have been removed. "
+    _, _, reacs = read_mech(mech, therm)
+    for reac in reacs:
+        assert reac.plog == False
+
+def compare_rate(mech_name, therm_name, pressure, temp_range):
+    """ Compare simulation between original and modified version.
 
     Check in in cantera implementation to be safe
     """
