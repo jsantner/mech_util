@@ -2,8 +2,40 @@
 import os
 import random
 import numpy as np
-from ..un_plog import convert_mech_un_plog
+from ..un_plog import convert_mech_un_plog, refit_reaction
 from ..mech_interpret import read_mech
+from ..chem_utilities import ReacInfo, Q_
+
+
+def test_refit_single():
+    rxn = ReacInfo(True, ['A'], [1], ['B'], [1], 1.0, 2.0, 3.0)
+    rxn.plog = True
+    rxn.plog_par = [[101325.0, 9.5e39, -9.43, Q_(5636.06, 'K')]]
+
+    new_rxn, dum = refit_reaction(rxn, 101325.0, [300, 5000])
+    assert dum == None
+    np.testing.assert_allclose(9.5e39, new_rxn.A)
+    np.testing.assert_allclose(-9.43, new_rxn.b)
+    np.testing.assert_allclose(5636.06, new_rxn.E)
+
+
+def test_closest():
+    """Test that converted reaction has appropriate pre-exponential. """
+    rxn = ReacInfo(True, ['A'], [1], ['B'], [1], 1.0, 2.0, 3.0)
+    rxn.plog = True
+    pressures = [Q_(101325 * x, 'Pa') for x in [0.1, 1, 10, 100, 1e5]]
+    As = [9.2e35, 9.5e39, 1.5e42, 1.8e40, 4400000.0]
+    bs =  [-8.65, -9.43, -9.69, -8.78, 1.45]
+    Es = [3522.54, 5636.06, 7598.62, 8454.09, 1207.73]
+    Es = [Q_(x, 'K') for x in Es]
+    rxn.plog_par = list(zip(pressures, As, bs, Es))
+
+    for i in range(5):
+        new_rxn, dum = refit_reaction(rxn, pressures[i], [300, 5000])
+        assert dum == None
+        np.testing.assert_allclose(As[i], new_rxn.A)
+        np.testing.assert_allclose(bs[i], new_rxn.b)
+        np.testing.assert_allclose(Es[i], new_rxn.E)
 
 
 def test_convert_mech():
@@ -139,7 +171,7 @@ def print_time_history_comparison(arr1, arr2):
     print('------     ------     ----------------')
     skip_count = 0
     for val1, val2 in zip(arr1, arr2):
-        if skip_count == 10:
+        if skip_count == 20:
             skip_count = 0
         else:
             skip_count += 1
