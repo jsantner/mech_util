@@ -186,7 +186,7 @@ def interpolate_k(reaction, pressure, temp_range, permissive):
 
     # If outside the range, use the max or min plog parameters
     if pressures[-1] < pressure or pressures[0] > pressure:
-        msg = ('Reaction {:}. The given pressure of '
+        msg = ('Reaction {:}. \tThe given pressure of '
                '{:.2g} atm is outside the given PLOG pressures, '
                '{:.2g} - {:.2g} atm.'.format(
                   str(reaction), pressure.to('atm').m,
@@ -317,7 +317,7 @@ def plot_fit(r_orig, r1_mod, r2_mod, mech_name, pressure, temp_range,
 
 
 
-def convert_mech_un_plog(mech_name, therm_name=None, pressure=1.0,
+def convert_mech_un_plog(mech_name, therm_name=None, pressure='1.0 atm',
                          temp_range=[300.,5000.], permissive=False, plot=True):
     """
 
@@ -328,7 +328,7 @@ def convert_mech_un_plog(mech_name, therm_name=None, pressure=1.0,
         Reaction mechanism filename (e.g. 'mech.dat')
     therm_name : string, optional
         Thermodynamic database filename (e.g. 'therm.dat') or None
-    pressure : TYPE, optional
+    pressure : str, optional
         Pressure with units for hard-coding PLOG reactions.
         If no units specified, atm assumed.
     temp_range : list, optional
