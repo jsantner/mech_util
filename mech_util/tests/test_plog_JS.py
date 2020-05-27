@@ -49,7 +49,7 @@ def compare_rate(rxn_num, mech_name, therm_name, pressure, temp_range):
 
     success_counter = 0
     for i in range(10):  # Test with 10 random parameters
-        print('Iteration {}'.format(i))
+        print('\nIteration {}'.format(i))
         # x1 = random.random()
         # mix = {'R1A': x1, 'R1B': 1 - x1, 'H': 0.01*random.random(),
         #        'R5': 0.01*random.random(), 'P1': 0.01*random.random()}
@@ -101,7 +101,7 @@ def compare_rate(rxn_num, mech_name, therm_name, pressure, temp_range):
             continue
 
         if not np.allclose(T_outputs[1], T_outputs[0], rtol=5e-2):
-            print('\nPrinting T histories')
+            print('\nTemperature histories do not match:')
             print_time_history_comparison(T_outputs[0], T_outputs[1])
             assert False
 
@@ -109,7 +109,8 @@ def compare_rate(rxn_num, mech_name, therm_name, pressure, temp_range):
             for ind in range(len(X_outputs[1][0, :])):
                 if not np.allclose(X_outputs[1][:, ind], X_outputs[0][:, ind],
                                    rtol=5e-2, atol=1e-5):
-                    print('\nPrinting mole fraction of ' + gas1.species(ind).name)
+                    print('\nTime history for ' + gas1.species(ind).name +
+                          ' mole fraction does not match:')
                     print_time_history_comparison(X_outputs[0][:, ind],
                                                   X_outputs[1][:, ind])
             assert False
@@ -121,8 +122,8 @@ def compare_rate(rxn_num, mech_name, therm_name, pressure, temp_range):
 def print_time_history_comparison(arr1, arr2):
     " Print a user-friendly comparsion of time histories. "
     assert len(arr1) == len(arr2)
-    print('item 1   item 2   Percent difference')
-    print('------   ------   ----------------')
+    print('item 1     item 2     Percent difference')
+    print('------     ------     ----------------')
     skip_count = 0
     for val1, val2 in zip(arr1, arr2):
         if skip_count == 10:
@@ -130,7 +131,7 @@ def print_time_history_comparison(arr1, arr2):
         else:
             skip_count += 1
 
-        row = '{:<9.4g}{:<9.4g}{:<9.3g}'.format(val1, val2, 100*(val2/val1 - 1))
+        row = '{:<11.4g}{:<11.4g}{:<11.3g}'.format(val1, val2, 100*(val2/val1 - 1))
         if not np.isclose(val1, val2, rtol=5e-2, atol=1e-5):
             print('\x1b[1;31;40m' + row + '\x1b[0m')
         elif skip_count == 0:
