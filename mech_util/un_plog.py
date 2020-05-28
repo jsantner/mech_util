@@ -1,5 +1,4 @@
-"""Replaces PLOG reactions with Arrhenius reactions at a single pressure.
-"""
+" Replaces PLOG reactions with Arrhenius reactions at a single pressure. "
 
 # Python 2 compatibility
 from __future__ import division
@@ -8,25 +7,13 @@ from __future__ import absolute_import
 
 # Standard libraries
 import copy
-import math
 import os
 import warnings
-from multiprocessing import Pool
-from itertools import repeat
 import bisect
 import matplotlib.pyplot as plt
-
-try:
-    import numpy as np
-except ImportError:
-    print('Error: NumPy must be installed.')
-    raise
-try:
-    from scipy.optimize import leastsq
-    from scipy.optimize import curve_fit
-except ImportError:
-    print('Error: SciPy must be installed.')
-    raise
+from pint import DimensionalityError
+import numpy as np
+from scipy.optimize import curve_fit
 
 # Local imports
 from . import chem_utilities as chem
@@ -41,15 +28,8 @@ def calc_rate_coeff(p, T):
     return k
 
 
-def residuals(p, y, x):
-    """Residual for calculating rate coefficient."""
-    A, b, E = p
-    err = y - calc_rate_coeff(p, x)
-    return err
-
-
 def double_arrhenius(invT, logA1, b1, E1, logA2, b2, E2):
-    " Natural log of double Arrhenius rate."
+    "Natural log of double Arrhenius rate."
     k1 = np.exp(single_arrhenius(invT, logA1, b1, E1))
     k2 = np.exp(single_arrhenius(invT, logA2, b2, E2))
     return np.log(k1 + k2)
@@ -64,7 +44,8 @@ def double_arrhenius_negA(invT, logA1, b1, E1, logA2, b2, E2):
 
 
 def single_arrhenius(invT, logA, b, E):
-    """ Returns the natural log of reaction rate
+    """Returns the natural log of reaction rate.
+    E is the activation energy in Kelvin
 
     k = A * T**b * exp(-E / T)
     logk = logA + b*logT - E / T
@@ -74,10 +55,32 @@ def single_arrhenius(invT, logA, b, E):
 
 
 def refit_reaction(reaction, pressure, temp_range, permissive=False):
-    """ Create a single Arrhenius function for the PLOG reaction at the given
-    pressure and temperature range [K].
+    """
+    Create a single Arrhenius fit for the PLOG reaction at the given pressure.
+
+    Parameters
+    ----------
+    reaction : ReacInfo
+        Reaction object
+    pressure : pint quantity
+        Pressure to evaluate reaction rate.
+    temp_range : list
+        Temperature range [K] over which to evaluate the reaction rate.
+    permissive : bool, int, optional
+        If pressure is outside the PLOG range:
+            0, False: raise error
+            1, True: print warning
+            2: ignore
+
+    Returns
+    -------
+    reaction1 : ReacInfo
+        Arrhenius reaction object
+    reaction2 : ReacInfo
+        Arrhenius reaction object for double arrhenius fit, otherwise None.
 
     """
+
     logk, T, p0 = interpolate_k(reaction, pressure, temp_range, permissive)
 
     bounds1 = ((-7e2, -np.inf, -np.inf), (7e2, np.inf, np.inf))
@@ -86,7 +89,7 @@ def refit_reaction(reaction, pressure, temp_range, permissive=False):
     # Fit a new Arrhenius function
     invT = 1 / T
     if len(p0) == 3:
-        p0[2] = p0[2].to('K').m # Use activation energy in Kelvin
+        p0[2] = p0[2].to('K').m  # Use activation energy in Kelvin
         if np.sign(p0[0]) == -1:
             raise ValueError('Single Arrhenius reaction rate must be positive')
         p0[0] = np.log(p0[0])
@@ -97,8 +100,8 @@ def refit_reaction(reaction, pressure, temp_range, permissive=False):
             raise
         logA, b, E = popt
     elif len(p0) == 6:
-        p0[2] = p0[2].to('K').m # Use activation energy in Kelvin
-        p0[5] = p0[5].to('K').m # Use activation energy in Kelvin
+        p0[2] = p0[2].to('K').m  # Use activation energy in Kelvin
+        p0[5] = p0[5].to('K').m  # Use activation energy in Kelvin
         s_A = (np.sign(p0[0]), np.sign(p0[3]))
         p0[0] = np.log(abs(p0[0]))
         p0[3] = np.log(abs(p0[3]))
@@ -262,14 +265,33 @@ def interpolate_k(reaction, pressure, temp_range, permissive):
 
 def plot_fit(r_orig, r1_mod, r2_mod, mech_name, pressure, temp_range,
              permissive=False, plot=True):
-    """ Calculate fit error and plot the new and original reactions against
-    each other for the given pressure and temperature range. For a duplicate
-    reaction, r1_mod and r2_mod are the duplicate rates.
-
-    If RMS error is too high:
-        permissive: print warning message and plot the fit
-        not permissive: raise error.
     """
+    Calculate fit error and plot the new and old reaction rates.
+
+    Parameters
+    ----------
+    r_orig : ReacInfo
+        Original PLOG reaction
+    r1_mod : ReacInfo
+        Arrhenius reaction
+    r2_mod : ReacInfo
+        Arrhenius reaction for double-arrhenius fit. Otherwise, None.
+    mech_name : str
+        Full path to mechanism. Figures will be saved in this directory.
+    pressure : Quantity
+        Pressure to evaluate reaction rates.
+    temp_range : list
+        Temperature range to evaluate, in Kelvin
+    permissive : bool, optional
+        If the RMS error is too high....
+        False: ValueError is raised
+        True: Print an error message and create a plot even if plot=False
+        if The default is False.
+    plot : bool, optional
+        If True, plot the comparison for every reaction. The default is True.
+
+    """
+
     T = 1/np.linspace(1/temp_range[0], 1/temp_range[1], 200)
     logk_0, T0, _ = interpolate_k(r_orig, pressure, temp_range, 2)
     assert np.allclose(T, T0)
@@ -284,8 +306,7 @@ def plot_fit(r_orig, r1_mod, r2_mod, mech_name, pressure, temp_range,
     if r1_mod is not None:
         error = np.sqrt(np.mean((k_mod / k_0 - 1)**2))
         if error > 0.1:
-            msg = 'Error in fit is too high: {:.2g} for {:}'.format(error,
-                                                                    str(r_orig))
+            msg = 'Error in fit is too high: {:.2g} for {:}'.format(error, str(r_orig))
             if permissive:
                 print('WARNING: ' + msg)
                 plot = True
@@ -318,9 +339,9 @@ def plot_fit(r_orig, r1_mod, r2_mod, mech_name, pressure, temp_range,
 
 
 def convert_mech_un_plog(mech_name, therm_name=None, pressure='1.0 atm',
-                         temp_range=[300.,5000.], permissive=False, plot=True):
+                         temp_range=[300, 5000], permissive=False, plot=True):
     """
-
+    Replace PLOG reactions from a chemkin-style mechanism with Arrhenius fits.
 
     Parameters
     ----------
@@ -337,10 +358,6 @@ def convert_mech_un_plog(mech_name, therm_name=None, pressure='1.0 atm',
         Allow larger uncertainties with warnings. The default is False.
     plot : TYPE, optional
         Plot all new reaction fits. The default is True.
-
-    Returns
-    -------
-    None.
 
     """
     pressure = chem.Q_(pressure)

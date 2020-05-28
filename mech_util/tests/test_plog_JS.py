@@ -64,7 +64,8 @@ def all_removed(mech, therm):
     " Check that all PLOG rates have been removed. "
     _, _, reacs = read_mech(mech, therm)
     for reac in reacs:
-        assert reac.plog == False
+        assert reac.plog is False
+
 
 def compare_rate(mech_name, therm_name, pressure, temp_range):
     """ Compare simulation between original and modified version.
@@ -77,7 +78,7 @@ def compare_rate(mech_name, therm_name, pressure, temp_range):
     import cantera
     import cantera.ck2cti
 
-    pressure = float(pressure.split()[0]) * 101325 # Convert to Pa
+    pressure = float(pressure.split()[0]) * 101325  # Convert to Pa
     pth = os.path.dirname(os.path.realpath(__file__))
     wdir = os.path.join(pth, 'mechanisms')
 
@@ -105,7 +106,6 @@ def compare_rate(mech_name, therm_name, pressure, temp_range):
         print('Temperature: {:.2f} K'.format(T))
         T_outputs = []
         X_outputs = []
-        t_outputs = []
 
         # Find appropriate end time
         gas1.TPX = T, pressure, mix
@@ -131,7 +131,6 @@ def compare_rate(mech_name, therm_name, pressure, temp_range):
 
                 T_hist = []
                 X_hist = []
-                row = [None]*4
                 for t in time:
                     sim.advance(t)
                     T_hist.append(sol.T)
