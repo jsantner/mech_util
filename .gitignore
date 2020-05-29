@@ -1,9 +1,8 @@
 *.txt
-*.dat
-*.inp
 dist/
 irrev_mech.egg-info
 *.pyc
 .cache/
 mech_util/tests/mechanisms/*.png
 mech_util/tests/mechanisms/*.cti
+mech_util/tests/mechanisms/un_plog*

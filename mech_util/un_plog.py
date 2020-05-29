@@ -332,8 +332,8 @@ def plot_fit(r_orig, r1_mod, r2_mod, mech_name, pressure, temp_range,
             ax.plot(invT, 100 * (k_mod / k_0 - 1), 'k-')
             ax.set_ylabel('% error')
             ax.set_xlabel('1000 / T $[K^{-1}]$')
-
-        fig.savefig(os.path.join(os.path.dirname(mech_name), str(r_orig) + '.png'))
+        fname = str(r_orig).replace('<', '').replace('>', '') + '.png'
+        fig.savefig(os.path.join(os.path.dirname(mech_name), fname))
         plt.close(fig)
 
 

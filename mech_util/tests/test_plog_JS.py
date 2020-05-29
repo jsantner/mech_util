@@ -43,8 +43,8 @@ def test_convert_mech():
     P = 10 ** (-2 + 4*random.random())  # Pressure for the test.
     P = '{:.2g} atm'.format(P)
     print('Testing at {:}'.format(P))
-    args = {'mech_name': os.path.join(pth, 'mechanisms', 'butane_100spec.inp'),
-            'therm_name': os.path.join(pth, 'mechanisms', 'butane_100spec_therm.dat'),
+    args = {'mech_name': os.path.join(pth, 'mechanisms', 'chem.inp'),
+            'therm_name': os.path.join(pth, 'mechanisms', 'therm.dat'),
             'pressure': P, 'temp_range': [300.0, 5000.0]}
     convert_mech_un_plog(**args, permissive=True, plot=False)
 
@@ -83,11 +83,11 @@ def compare_rate(mech_name, therm_name, pressure, temp_range):
     wdir = os.path.join(pth, 'mechanisms')
 
     parser = cantera.ck2cti.Parser()
-    parser.convertMech(mech_name, therm_name,
+    parser.convertMech(mech_name, therm_name, permissive=True,
                        outName=os.path.join(wdir, 'original.cti'))
     head, tail = os.path.split(mech_name)
     new_mech = os.path.join(head, 'un_plog_' + tail)
-    parser.convertMech(new_mech, therm_name,
+    parser.convertMech(new_mech, therm_name, permissive=True,
                        outName=os.path.join(wdir, 'un_plog.cti'))
 
     gas1 = cantera.Solution(os.path.join(wdir, 'original.cti'))
@@ -96,11 +96,8 @@ def compare_rate(mech_name, therm_name, pressure, temp_range):
     success_counter = 0
     for i in range(10):  # Test with 10 random parameters
         print('\nIteration {}'.format(i))
-        # x1 = random.random()
-        # mix = {'R1A': x1, 'R1B': 1 - x1, 'H': 0.01*random.random(),
-        #        'R5': 0.01*random.random(), 'P1': 0.01*random.random()}
         phi = 0.1 + random.random() * 2
-        mix = {'C4H10': phi*0.21/6.5, 'O2': 0.21, 'N2': 0.79}
+        mix = {'H2': phi*0.21*2, 'O2': 0.21, 'N2': 0.79}
         T = temp_range[0] + random.random() * (temp_range[1] / 2 - temp_range[0])
         print('Mixture: ' + str(mix))
         print('Temperature: {:.2f} K'.format(T))
