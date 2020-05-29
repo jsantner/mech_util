@@ -365,7 +365,7 @@ def convert_mech_un_plog(mech_name, therm_name=None, pressure='1.0 atm',
         pressure.ito('pascal')
     except DimensionalityError:
         warnings.warn(
-            'No units specified, or units incompatible with pressure. ',
+            'No units specified, or units incompatible with pressure. '
             'Assuming atm.'
             )
         pressure = (pressure.magnitude * chem.units.atm).to('pascal')
