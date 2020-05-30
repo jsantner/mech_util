@@ -7,7 +7,6 @@ from argparse import ArgumentParser
 
 from ._version import __version__
 from .irrev_mech import convert_mech_irrev
-# from .remove_plog import remove_plog_reactions
 from .un_plog import convert_mech_un_plog
 
 

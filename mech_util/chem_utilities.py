@@ -223,7 +223,6 @@ class ReacInfo(CommonEqualityMixin):
         self.plog_par = None
 
     def __str__(self):
-        # Not 100% accurate...
         return self.eqn
 
 
