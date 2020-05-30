@@ -2,9 +2,9 @@
 """
 Manually test the code to run specific cases.
 
-This code should be run by a human, not through pytest. It will create a figure
-comparing the constant-pressure "ignition delay" between the original model
-and the model with PLOG removed.
+This code should be run by a human, with user-defined variables at the end of
+this file. It will create a figure comparing the constant-pressure
+"ignition delay" between the original model and the model with PLOG removed.
 """
 import os
 import numpy as np
