@@ -46,7 +46,7 @@ def test_convert_mech():
     args = {'mech_name': os.path.join(pth, 'mechanisms', 'chem.inp'),
             'therm_name': os.path.join(pth, 'mechanisms', 'therm.dat'),
             'pressure': P, 'temp_range': [300.0, 5000.0]}
-    convert_mech_un_plog(**args, permissive=True, plot=False)
+    convert_mech_un_plog(**args, permissive=True, plot=True)
 
     head, tail = os.path.split(args['mech_name'])
     new_mech = os.path.join(head, 'un_plog_' + tail)

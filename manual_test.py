@@ -70,8 +70,8 @@ if __name__ == '__main__':
     therm_name = 'therm.dat'
     pressure = 10  # Pressure in atm
     fuel = 'H2'
-    T = 1200  # Temperature in Kelvin
-    phis = (0.75, 1.0)
+    T = 800  # Temperature in Kelvin
+    phis = (0.5, 1.0)
     ##########################
 
     mech_name = os.path.join(test_dir, mech_name)
