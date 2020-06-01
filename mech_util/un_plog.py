@@ -190,8 +190,8 @@ def interpolate_k(reaction, pressure, temp_range, permissive):
     # If outside the range, use the max or min plog parameters
     if pressures[-1] < pressure or pressures[0] > pressure:
         msg = ('Reaction {:}. \tThe given pressure of '
-               '{:.2g} atm is outside the given PLOG pressures, '
-               '{:.2g} - {:.2g} atm.'.format(
+               '{:.3g} atm is outside the given PLOG pressures, '
+               '{:.3g} - {:.3g} atm.'.format(
                   str(reaction), pressure.to('atm').m,
                   pressures[0].to('atm').m, pressures[-1].to('atm').m))
         if permissive == 2:

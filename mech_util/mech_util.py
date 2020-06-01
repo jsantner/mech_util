@@ -87,6 +87,12 @@ def mech_util(argv):
         dest='permissive', action='store_true', default=False
         )
 
+    parser.add_argument(
+        '--fewer_plog_plots',
+        help='Only create PLOG fitting plots if fitting error is > 10%',
+        dest='plot', action='store_false', default=True
+        )
+
     if len(argv) == 0:
         parser.print_help()
         sys.exit(1)
@@ -112,4 +118,4 @@ def mech_util(argv):
     if args.remove_plog:
         convert_mech_un_plog(
             args.model, args.thermo, args.pressure, args.temp_range,
-            args.permissive)
+            args.permissive, args.plot)
